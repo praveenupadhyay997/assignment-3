@@ -4,7 +4,7 @@ import styled from 'styled-components';
 const PlaceholderContainer = styled.div`
   background-color: ${({ theme }) => theme.colors.divider};
   border-radius: ${({ theme }) => theme.borderRadius};
-  height: 50px; // Adjust height to match your task card
+  height: 50px; /* match TaskCard height as needed */
   margin-bottom: ${({ theme }) => theme.spacings.sm};
 `;
 

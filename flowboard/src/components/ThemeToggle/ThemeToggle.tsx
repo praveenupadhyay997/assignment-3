@@ -9,7 +9,7 @@ const ToggleContainer = styled.div`
   z-index: 1000;
 `;
 
-const ToggleButton = styled.button<{ active: boolean }>`
+const ToggleButton = styled.button<{ $isActive: boolean }>`
   background: ${({ theme }) => theme.colors.background.paper};
   border: 1px solid ${({ theme }) => theme.colors.divider};
   border-radius: 20px;
@@ -26,7 +26,7 @@ const ToggleButton = styled.button<{ active: boolean }>`
   box-shadow: ${({ theme }) => theme.shadows.sm};
 `;
 
-const ToggleIcon = styled.span<{ active: boolean }>`
+const ToggleIcon = styled.span<{ $isActive: boolean }>`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -34,8 +34,8 @@ const ToggleIcon = styled.span<{ active: boolean }>`
   width: 100%;
   height: 100%;
   transition: all 0.3s ease;
-  color: ${({ theme, active }) => 
-    active ? theme.colors.primary : theme.colors.text.secondary};
+  color: ${({ theme, $isActive }) => 
+    $isActive ? theme.colors.primary : theme.colors.text.secondary};
 `;
 
 const ToggleThumb = styled.span<{ $isDark: boolean }>`
@@ -59,10 +59,10 @@ export const ThemeToggle: React.FC = () => {
       <ToggleButton 
         onClick={toggleTheme}
         aria-label="Toggle theme"
-        active={isDark}
+        $isActive={isDark}
       >
-        <ToggleIcon active={!isDark}>☀️</ToggleIcon>
-        <ToggleIcon active={isDark}>🌙</ToggleIcon>
+        <ToggleIcon $isActive={!isDark}>☀️</ToggleIcon>
+        <ToggleIcon $isActive={isDark}>🌙</ToggleIcon>
         <ToggleThumb $isDark={isDark} />
       </ToggleButton>
     </ToggleContainer>

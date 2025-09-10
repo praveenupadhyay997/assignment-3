@@ -41,25 +41,37 @@ const boardSlice = createSlice({
     moveTask: (state, action: PayloadAction<{ sourceColumnId: string; destColumnId: string; sourceIndex: number; destIndex: number; taskId: string }>) => {
       const { sourceColumnId, destColumnId, sourceIndex, destIndex, taskId } = action.payload;
       
+      console.log('moveTask reducer called with:', { sourceColumnId, destColumnId, sourceIndex, destIndex, taskId });
+      
       // Move within the same column
       if (sourceColumnId === destColumnId) {
         const column = state.columns[sourceColumnId];
+        console.log('Moving within column. Before move:', { taskIds: [...column.taskIds] });
+        
         const newTaskIds = Array.from(column.taskIds);
-        newTaskIds.splice(sourceIndex, 1);
-        newTaskIds.splice(destIndex, 0, taskId);
+        // Remove from old position
+        const [movedTask] = newTaskIds.splice(sourceIndex, 1);
+        // Insert at new position
+        newTaskIds.splice(destIndex, 0, movedTask);
+        
         column.taskIds = newTaskIds;
+        console.log('After move:', { taskIds: [...column.taskIds] });
       } else {
-        // Move to a different column
+        // Move between columns
         const sourceColumn = state.columns[sourceColumnId];
         const destColumn = state.columns[destColumnId];
         
-        const sourceTaskIds = Array.from(sourceColumn.taskIds);
-        sourceTaskIds.splice(sourceIndex, 1);
-        sourceColumn.taskIds = sourceTaskIds;
+        // Remove from source column
+        const newSourceTaskIds = Array.from(sourceColumn.taskIds);
+        newSourceTaskIds.splice(sourceIndex, 1);
         
-        const destTaskIds = Array.from(destColumn.taskIds);
-        destTaskIds.splice(destIndex, 0, taskId);
-        destColumn.taskIds = destTaskIds;
+        // Add to destination column
+        const newDestTaskIds = Array.from(destColumn.taskIds);
+        newDestTaskIds.splice(destIndex, 0, taskId);
+        
+        // Update state
+        sourceColumn.taskIds = newSourceTaskIds;
+        destColumn.taskIds = newDestTaskIds;
       }
     },
     deleteTask: (state, action: PayloadAction<{ columnId: string; taskId: string }>) => {

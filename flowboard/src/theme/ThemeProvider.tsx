@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import { Theme, ThemeMode } from '../types/theme';
-import { darkTheme, lightTheme, getTheme } from './theme';
+import type { Theme, ThemeMode } from '../types/theme';
+import { getTheme } from './theme';
 
 type ThemeContextType = {
   theme: Theme;

@@ -1,4 +1,4 @@
-import { Theme } from '../types/theme';
+import type { Theme } from "../types/theme";
 
 const baseSpacing = {
   xs: '4px',
@@ -36,7 +36,7 @@ const baseTypography = {
   button: {
     fontSize: '0.875rem',
     fontWeight: 500,
-    textTransform: 'none',
+    textTransform: 'none' as const,
   },
 };
 
