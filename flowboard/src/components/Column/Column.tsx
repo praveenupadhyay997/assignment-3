@@ -2,35 +2,65 @@ import * as React from 'react';
 import type { Column as ColumnType, Task } from '../../types/board';
 import TaskCard from '../TaskCard/TaskCard';
 import { useAppDispatch } from '../../store/store';
-import { addTask, moveTask } from '../../features/board/boardSlice';
+import { moveTask, addTask } from '../../features/board/boardSlice';
 import { useDrag } from '../../context/DragContext';
+import type { JSX } from 'react';
 
 interface ColumnProps {
   column: ColumnType;
   tasks: Task[];
 }
 
-const Column: React.FC<ColumnProps> = React.memo(({ column, tasks }) => {
+const Column: React.FC<ColumnProps> = React.memo(({ column, tasks }): JSX.Element => {
   const dispatch = useAppDispatch();
   const { setDraggedItem } = useDrag();
   const [isDraggingOver, setIsDraggingOver] = React.useState(false);
+  const [isAddingCard, setIsAddingCard] = React.useState(false);
+  const [newCardTitle, setNewCardTitle] = React.useState('');
+  const inputRef = React.useRef<HTMLTextAreaElement>(null);
   const dragCounterRef = React.useRef(0);
 
-  const handleAddTask = (content: string) => {
-    const newTaskId = `task-${Date.now()}`;
+  const handleAddCardClick = () => {
+    setIsAddingCard(true);
+    // Focus the input after it's rendered
+    setTimeout(() => inputRef.current?.focus(), 0);
+  };
+
+  const handleCardSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newCardTitle.trim()) {
+      setIsAddingCard(false);
+      return;
+    }
+
     const newTask: Task = {
-      id: newTaskId,
-      content,
+      id: `task-${Date.now()}`,
+      content: newCardTitle.trim(),
     };
-    dispatch(addTask({ columnId: column.id, task: newTask }));
+
+    dispatch(addTask({
+      columnId: column.id,
+      task: newTask
+    }));
+
+    setNewCardTitle('');
+    setIsAddingCard(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      setIsAddingCard(false);
+      setNewCardTitle('');
+    } else if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleCardSubmit(e);
+    }
   };
 
   const handleDragOver = React.useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log('=== DRAG OVER ===');
-    console.log('Current column:', column.id);
-
+    
     // Check if we're dragging a task (not other elements)
     const types = e.dataTransfer.types;
     console.log('DataTransfer types:', types);
@@ -223,38 +253,89 @@ const Column: React.FC<ColumnProps> = React.memo(({ column, tasks }) => {
             columnId={column.id}
           />
         ))}
-        <div 
-          style={{
-            marginTop: '8px',
-            padding: '8px',
-            borderRadius: '4px',
+        {isAddingCard ? (
+          <div style={{
             backgroundColor: 'white',
-            boxShadow: '0 1px 0 rgba(9, 30, 66, 0.1)',
-            cursor: 'pointer',
-            fontSize: '14px',
-            color: '#5e6c84',
-            transition: 'background-color 0.2s',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(9, 30, 66, 0.04)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'white';
-          }}
-          onClick={() => {
-            const content = prompt('Enter task content:');
-            if (content) {
-              const newTaskId = `task-${Date.now()}`;
-              const newTask: Task = {
-                id: newTaskId,
-                content,
-              };
-              dispatch(addTask({ columnId: column.id, task: newTask }));
-            }
-          }}
-        >
-          + Add a card
-        </div>
+            borderRadius: '4px',
+            padding: '8px',
+            boxShadow: '0 1px 0 rgba(9, 30, 66, 0.1)'
+          }}>
+            <form onSubmit={handleCardSubmit}>
+              <textarea
+                ref={inputRef}
+                value={newCardTitle}
+                onChange={(e) => setNewCardTitle(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Enter a title for this card..."
+                style={{
+                  width: '100%',
+                  minHeight: '60px',
+                  padding: '8px',
+                  border: '2px solid #0079bf',
+                  borderRadius: '4px',
+                  resize: 'none',
+                  fontFamily: 'inherit',
+                  fontSize: '14px',
+                  outline: 'none',
+                  boxSizing: 'border-box'
+                }}
+                autoFocus
+              />
+              <div style={{ marginTop: '8px', display: 'flex', gap: '8px' }}>
+                <button
+                  type="submit"
+                  style={{
+                    backgroundColor: '#0079bf',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '4px',
+                    padding: '6px 12px',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    fontWeight: 500
+                  }}
+                >
+                  Add Card
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsAddingCard(false);
+                    setNewCardTitle('');
+                  }}
+                  style={{
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    color: '#5e6c84',
+                    cursor: 'pointer',
+                    fontSize: '20px',
+                    lineHeight: '20px',
+                    padding: '0 8px'
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+            </form>
+          </div>
+        ) : (
+          <div 
+            onClick={handleAddCardClick}
+            style={{
+              marginTop: '8px',
+              padding: '8px',
+              borderRadius: '4px',
+              backgroundColor: 'white',
+              boxShadow: '0 1px 0 rgba(9, 30, 66, 0.1)',
+              cursor: 'pointer',
+              fontSize: '14px',
+              color: '#5e6c84',
+              transition: 'background-color 0.2s'
+            }}
+          >
+            + Add a card
+          </div>
+        )}
       </div>
     </div>
   );
