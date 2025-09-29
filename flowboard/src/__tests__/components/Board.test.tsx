@@ -100,4 +100,53 @@ describe('Board', () => {
     expect(screen.queryByText('Task 1')).not.toBeInTheDocument();
     expect(screen.queryByText('Task 2')).not.toBeInTheDocument();
   });
+
+  it('handles undefined tasks gracefully', () => {
+    const stateWithUndefinedTask = {
+      board: {
+        tasks: {
+          'task-1': { id: 'task-1', content: 'Task 1' },
+          // task-2 is missing from tasks object but referenced in column
+        },
+        columns: {
+          'column-1': { id: 'column-1', title: 'To Do', taskIds: ['task-1', 'task-2'] },
+        },
+        columnOrder: ['column-1'],
+      },
+      filters: {
+        searchTerm: '',
+      },
+    };
+    
+    // Should render without errors
+    renderWithStore(stateWithUndefinedTask);
+    expect(screen.getByText('To Do')).toBeInTheDocument();
+    expect(screen.getByText('Task 1')).toBeInTheDocument();
+    // Task 2 should not be rendered since it's undefined
+    expect(screen.queryByText('Task 2')).not.toBeInTheDocument();
+  });
+
+  it('handles tasks with missing content property', () => {
+    const stateWithInvalidTask = {
+      board: {
+        tasks: {
+          'task-1': { id: 'task-1', content: 'Task 1' },
+          'task-2': { id: 'task-2' } as any, // Missing content property
+        },
+        columns: {
+          'column-1': { id: 'column-1', title: 'To Do', taskIds: ['task-1', 'task-2'] },
+        },
+        columnOrder: ['column-1'],
+      },
+      filters: {
+        searchTerm: '',
+      },
+    };
+    
+    // Should render without errors
+    renderWithStore(stateWithInvalidTask);
+    expect(screen.getByText('To Do')).toBeInTheDocument();
+    expect(screen.getByText('Task 1')).toBeInTheDocument();
+    // Task 2 should not cause an error even though it has no content
+  });
 });

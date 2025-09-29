@@ -25,6 +25,7 @@ const Board: React.FC = () => {
         const column = board.columns[columnId];
         const tasks = column.taskIds
           .map(taskId => board.tasks[taskId])
+          .filter(task => task && task.content) // Check if task exists and has content
           .filter(task =>
             task.content.toLowerCase().includes(searchTerm.toLowerCase())
           );
